@@ -1,0 +1,127 @@
+# Example BoltBuild Configuration
+# This file demonstrates various configuration options
+
+# Server configuration for a high-capacity build server
+server:
+  port: 8080        # Standard build server port
+  capacity: 8       # Handle up to 8 concurrent builds
+
+# Client configuration for enterprise environment
+client:
+  # Server discovery settings
+  discovery:
+    ports: [8080, 8081, 8082, 8083, 8084, 8085, 9000, 9001]  # Extended port range
+    scan_interval: 5s                                          # Faster discovery
+    connect_timeout: 1s                                        # Quick timeout for faster scanning
+    network_range:
+      auto: false       # Manual network configuration
+      subnet: "10.0.1"  # Corporate network subnet
+      start_ip: 10      # Skip first 10 IPs (reserved for infrastructure)
+      end_ip: 100       # Limit to first 100 IPs
+  
+  # Timeout settings for production environment
+  timeouts:
+    build: 120s         # Allow longer builds (2 minutes)
+    reconnect: 10s      # Longer reconnection timeout
+    health_check: 10s   # Less frequent health checks
+
+# Web interface on alternative port
+web:
+  port: 9090          # Alternative web port
+
+# Extended build system configuration
+build:
+  temp_dir: "C:\\BuildTemp"  # Custom temp directory
+  temp_deletion: false          # Keep temporary directories for debugging
+  
+  # Comprehensive build environments
+  environments:
+    # C++ with custom optimization
+    cpp:
+      name: cpp
+      command: "g++ -std=c++20 -O3 -march=native -Wall -Wextra"
+      project_dir: "."                    # Project location where files are sent
+      execution_dir: "."                  # Relative to project_dir
+      output_paths: ["main.*", "*.exe", "*.out", "*.dll"]
+      post_build_script: "./post-build.sh"  # Script to run on client after successful build
+      env_vars:
+        CXX_FLAGS: "-ffast-math"
+    
+    # C with strict settings
+    c:
+      name: c
+      command: "gcc -std=c17 -O2 -Wall -Wextra -Werror"
+      project_dir: "."                    # Project location where files are sent
+      execution_dir: "."                  # Relative to project_dir
+      output_paths: ["main.*", "*.exe", "*.out"]
+      post_build_script: "deploy.bat"     # Windows batch script for deployment
+      env_vars:
+        CFLAGS: "-pedantic"
+    
+    # C# with specific framework
+    csharp:
+      name: csharp
+      command: "dotnet build --configuration Release --framework net8.0"
+      project_dir: "."                    # Project location where files are sent
+      execution_dir: "."                  # Relative to project_dir
+      output_paths: ["bin/**/*.exe", "bin/**/*.dll", "*.pdb"]
+      env_vars:
+        DOTNET_CLI_TELEMETRY_OPTOUT: "1"
+    
+    # Go with custom build flags
+    go:
+      name: go
+      command: "go build -ldflags '-s -w -X main.version=1.0.0' -trimpath"
+      project_dir: "."                    # Project location where files are sent
+      execution_dir: "."                  # Relative to project_dir
+      output_paths: ["*.exe", "main"]
+      post_build_script: "/usr/local/bin/package.py"  # Absolute path to Python packaging script
+      env_vars:
+        CGO_ENABLED: "0"
+        GOOS: "windows"
+    
+    # Rust environment
+    rust:
+      name: rust
+      command: "cargo build --release --target-dir ./target"
+      project_dir: "."                    # Project location where files are sent
+      execution_dir: "."                  # Relative to project_dir
+      output_paths: ["target/**/*.exe", "target/**/*.dll"]
+      env_vars:
+        CARGO_TARGET_DIR: "./target"
+        RUSTFLAGS: "-C target-cpu=native"
+    
+    # Python compilation
+    python:
+      name: python
+      command: "python -m py_compile"
+      project_dir: "."                    # Project location where files are sent
+      execution_dir: "."                  # Relative to project_dir
+      output_paths: ["__pycache__/**/*.pyc", "*.pyc"]
+      env_vars:
+        PYTHONPATH: "./src"
+        PYTHONOPTIMIZE: "2"
+    
+    # Java compilation
+    java:
+      name: java
+      command: "javac -cp ./lib/* -d ./build"
+      project_dir: "."                    # Project location where files are sent
+      execution_dir: "."                  # Relative to project_dir
+      output_paths: ["build/**/*.class", "*.jar"]
+      env_vars:
+        JAVA_HOME: "C:\\Program Files\\Java\\jdk-17"
+    
+    # Node.js/TypeScript
+    typescript:
+      name: typescript
+      command: "npx tsc --outDir ./dist"
+      project_dir: "."                    # Project location where files are sent
+      execution_dir: "."                  # Relative to project_dir
+      output_paths: ["dist/**/*.js", "dist/**/*.js.map"]
+      env_vars:
+        NODE_ENV: "production"
+
+# Logging configuration
+logging:
+  level: "info"  # "info" shows connections only, "debug" shows detailed build information and file operations
