@@ -101,9 +101,9 @@ func DefaultConfig() *Config {
 				},
 			},
 			Timeouts: TimeoutConfig{
-				Build:       30 * time.Second,
-				Reconnect:   5 * time.Second,
-				HealthCheck: 5 * time.Second,
+				Build:       120 * time.Second,
+				Reconnect:   10 * time.Second,
+				HealthCheck: 10 * time.Second,
 			},
 		},
 		Web: WebConfig{
